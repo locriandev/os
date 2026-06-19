@@ -6,6 +6,7 @@ WORKDIR /os
 ADD . .
 ARG OPENSHIFT_CI=0
 ARG OPENSHIFT_VERSION=overridden
+ARG YUM_REPO_NAMES=overridden
 RUN --mount=type=secret,id=yumrepos,target=/os/secret.repo extensions/build.sh
 
 ## Creates the repo metadata for the extensions.
