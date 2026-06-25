@@ -1,0 +1,4 @@
+kernel-64k-core-0:${kernel_evr}
+kernel-64k-modules-0:${kernel_evr}
+kernel-64k-modules-core-0:${kernel_evr}
+kernel-64k-modules-extra-0:${kernel_evr}

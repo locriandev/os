@@ -1,0 +1,6 @@
+kernel-devel-0:${kernel_evr}
+kernel-headers-0:${kernel_evr}
+kernel-0:${kernel_evr}
+kernel-core-0:${kernel_evr}
+kernel-modules-0:${kernel_evr}
+kernel-modules-extra-0:${kernel_evr}

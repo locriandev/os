@@ -1,0 +1,4 @@
+kernel-rt-core-0:${kernel_evr}
+kernel-rt-modules-0:${kernel_evr}
+kernel-rt-modules-extra-0:${kernel_evr}
+kernel-rt-devel-0:${kernel_evr}

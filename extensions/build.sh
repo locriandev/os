@@ -15,54 +15,49 @@ arch=$(uname -m)
 destdir=/usr/share/rpm-ostree/extensions/
 mkdir -p "${destdir}"
 
+# Helper function to download packages from a package list file
+download_packages() {
+    local package_file=$1
+    local packages
+
+    # Read package file and perform variable substitution
+    # This allows ${kernel_evr} in package files to be expanded
+    packages=$(envsubst < "extensions/${package_file}")
+
+    # Download the packages
+    dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
+        --arch="${arch}" --arch=noarch --destdir="${destdir}" \
+        ${packages}
+}
+
 # ipsec extension
-dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-    --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-    libreswan NetworkManager-libreswan openvswitch3.5-ipsec
+download_packages "packages-ipsec.txt"
 
 # usbguard extension
-dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-    --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-    usbguard
+download_packages "packages-usbguard.txt"
 
 # kerberos extension
-dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-    --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-    krb5-workstation libkadm5
+download_packages "packages-kerberos.txt"
 
 # sysstat extension
-dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-    --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-    sysstat
+download_packages "packages-sysstat.txt"
 
 # kernel-devel and kernel extensions (pinned to installed kernel version)
 # Include epoch (0:) so dnf can disambiguate name from version in NEVRA format
 kernel_evr=$(rpm -q --queryformat '%{VERSION}-%{RELEASE}' kernel)
-dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-    --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-    "kernel-devel-0:${kernel_evr}" "kernel-headers-0:${kernel_evr}" \
-    "kernel-0:${kernel_evr}" "kernel-core-0:${kernel_evr}" \
-    "kernel-modules-0:${kernel_evr}" "kernel-modules-extra-0:${kernel_evr}"
+download_packages "packages-kernel-devel.txt"
 
 # kernel-rt extension (x86_64 only, pinned to installed kernel version)
 if [ "${arch}" = "x86_64" ]; then
-    dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-        --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-        "kernel-rt-core-0:${kernel_evr}" "kernel-rt-modules-0:${kernel_evr}" \
-        "kernel-rt-modules-extra-0:${kernel_evr}" "kernel-rt-devel-0:${kernel_evr}"
+    download_packages "packages-kernel-rt.txt"
 fi
 
 # kernel-64k extension (aarch64 only)
 if [ "${arch}" = "aarch64" ]; then
-    dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-        --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-        "kernel-64k-core-0:${kernel_evr}" "kernel-64k-modules-0:${kernel_evr}" \
-        "kernel-64k-modules-core-0:${kernel_evr}" "kernel-64k-modules-extra-0:${kernel_evr}"
+    download_packages "packages-kernel-64k.txt"
 fi
 
 # two-node-ha extension (RHEL only)
 if [ "$ID" = "rhel" ]; then
-    dnf --repo="${YUM_REPO_NAMES}" download --resolve --alldeps \
-        --arch="${arch}" --arch=noarch --destdir="${destdir}" \
-        pacemaker pcs fence-agents-all
+    download_packages "packages-two-node-ha.txt"
 fi
